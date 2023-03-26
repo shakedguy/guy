@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+
+
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo
+   echo "Installation script for esbot."
+   echo
+   echo "Syntax: scriptTemplate [-g|h|v|V]"
+   echo "options:"
+   echo "g     Print the GPL license notification."
+   echo "h     Print this Help."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
+   echo
+}
+
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+
+
+name="kfir"
+
+
+
+AddUser(){
+
+    if [[ ! -z "$name" ]]
+    then
+        if ! id -u $name &>/dev/null;
+        then
+            echo "Adding user $name"
+            sudo useradd -s /bin/bash -m -p $(perl -e 'print crypt($ARGV[0], "password")' "$name") "$name" 
+            sudo usermod -aG sudo $name
+            sudo usermod -aG adm $name
+            sudo usermod -aG systemd-journal $name
+            sudo usermod -aG systemd-network $name
+            sudo usermod -aG systemd-resolve $name
+            sudo usermod -aG systemd-timesync $name
+        else
+            echo "User $name already exists"
+        fi
+    else
+        echo "No user name provided"
+    fi
+}
+
+
+
+# Get the options
+while getopts ":hn:" option; do
+case $option in
+            h) # display Help
+                Help
+                exit;;
+
+            n) # linux user name to add
+                name=${OPTARG}
+                ;;
+             
+            \?) # Invalid option
+                echo "Error: Invalid option"
+                exit;;
+   esac
+done
+
+
+AddUser
+
